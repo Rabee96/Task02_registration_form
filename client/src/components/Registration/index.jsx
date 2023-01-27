@@ -1,4 +1,3 @@
-
 import * as React from 'react';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
@@ -18,7 +17,9 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { InputLabel } from '@mui/material';
 import { useState } from 'react';
 import { validatePhoneNumber,validateEmail,validateName,passwordValidator, passwordMatched,validBirthDate } from '../../features/validators/Validator';
+import { ToastContainer, toast } from 'react-toastify';import 'react-toastify/dist/ReactToastify.css';
 import { PasswordInputField } from '../PasswordInput';
+import {register} from '../../api/register';
 
 const theme = createTheme();
 export const Registration = () => {
@@ -27,7 +28,6 @@ export const Registration = () => {
     const [credential, setCredential] = useState({
       firstName:'',
       lastName:'',
-      companyName:'',
       password:'',
       passwordConfirmation:'',
       age:'',
@@ -88,9 +88,26 @@ export const Registration = () => {
       });
     };
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
-        console.log(credential);
+        try {
+          await register(credential)
+          toast('You registered successfully.');
+        }  catch (error) {
+          const exception = error;
+          if (exception.response) {
+            if (exception.response.status === 400) { 
+              toast(exception.response.data.message);
+            } else {
+              toast('Something went wrong, please try again later.');
+            }
+          } else if (exception.request) {
+            toast('Something went wrong, please try again later.');
+          } else {
+            toast('Something went wrong, please try again later.');
+          }
+        }
+
       };
     
       return (
@@ -359,6 +376,7 @@ export const Registration = () => {
               </Box>
             </Box>
           </Container>
+          <ToastContainer />
         </ThemeProvider>
       );
 }
